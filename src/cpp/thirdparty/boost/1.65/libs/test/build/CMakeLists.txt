@@ -6,7 +6,7 @@
 #
 # See http://www.boost.org/libs/test for the library home page.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.14)
 project(BoostTest)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

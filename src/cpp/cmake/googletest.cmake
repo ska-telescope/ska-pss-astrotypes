@@ -1,4 +1,25 @@
 # googletest build - must be built with the same compiler flags
+# googletest build - must be built with the same compiler flags
+cmake_minimum_required(VERSION 3.14)
+include(FetchContent)
+
+set(GTEST_VERSION "release-1.12.1")
+#set the destination directory for the download of googletest
+set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest")
+
+find_package(GTest)
+if(GTest_FOUND)
+  message("GTest found")
+
+else()
+  message("GTest not found. Fetching Googletest version ${GTEST_VERSION}")
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        ${GTEST_VERSION}
+  )
+  FetchContent_MakeAvailable(googletest)
+endif()
 
 if(NOT PSS_ASTROTYPES_GTEST_GUARD_VAR)
     set(PSS_ASTROTYPES_GTEST_GUARD_VAR TRUE)
@@ -13,9 +34,8 @@ if(NOT GTEST_INCLUDE_DIR)
         add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
     endif()
 
-    add_subdirectory("thirdparty/googletest")
-    set(GTEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest/include)
-    set(GMOCK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googlemock/include)
+    set(GTEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest/googletest-src/googletest/include)
+    set(GMOCK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest/googletest-src/googlemock/include)
     set(GTEST_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/googletest)
     set(GTEST_LIBRARIES gtest_main gtest)
 endif()
