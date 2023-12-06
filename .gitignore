@@ -36,3 +36,4 @@
 
 # build directory
 /build/
+src/cpp/thirdparty/googletest/
