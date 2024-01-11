@@ -1,0 +1,150 @@
+variables:
+    GIT_STRATEGY: clone
+    CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.6/
+stages:
+  - build
+  - test
+  - publish-docs
+
+.builds:
+  stage: build
+  rules:
+      # Execute pipeline automatically if commit is made to dev or main
+      # (this should only happen when code is merged to dev or main)
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+
+      # Create but do not execute pipeline for feature branches on commit,
+      # or if created via the gitlab GUI
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api"
+      when: manual
+      allow_failure: false
+
+      # Execute pipeline if triggered by a schedule
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+      # Execute pipeline automatically if triggered by a MR
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  tags:
+    - ubuntu-18.04
+  script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
+    - make -j
+    - make -j install
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME-build"
+    paths:
+      - build/*
+    expire_in: 1 d
+
+.tests:
+  stage: test
+  rules:
+      # Execute pipeline automatically if commit is made to dev or main
+      # (this should only happen when code is merged to dev or main)
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+
+      # Create but do not execute pipeline for feature branches on commit,
+      # or if created via the gitlab GUI
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api"
+      when: manual
+      allow_failure: false
+
+      # Execute pipeline if triggered by a schedule
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+      # Execute pipeline automatically if triggered by a MR
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  tags:
+    - ubuntu-18.04
+  script:
+    - cd build
+    - make test
+
+build-release:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false"
+
+build-debug:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=false"
+
+build-cuda-release:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true"
+
+build-cuda-debug:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true"
+
+build-nasm-release:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
+
+build-nasm-debug:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
+
+build-cuda-nasm-release:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true -DENABLE_NASM=true"
+
+build-cuda-nasm-debug:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true -DENABLE_NASM=true"
+
+test-release:
+  extends: .tests
+  needs:
+    - build-release
+
+test-debug:
+  extends: .tests
+  needs:
+    - build-debug
+
+test-cuda-release:
+  extends: .tests
+  needs:
+    - build-cuda-release
+
+test-cuda-debug:
+  extends: .tests
+  needs:
+    - build-cuda-debug
+
+doc-build:
+  stage: build
+  image: alpine
+  script:
+    - apk update && apk add build-base cmake doxygen graphviz ttf-freefont
+    - mkdir build-docs
+    - cd build-docs
+    - cmake -DCMAKE_BUILD_TYPE=documentation ../
+    - make doc
+  artifacts:
+    paths:
+      - build-docs/
+  only:
+    - main
+
+pages:
+  stage: publish-docs
+  image: alpine
+  script:
+    - mv build-docs/doc/html/ public/
+  needs:
+    - doc-build
+  artifacts:
+    paths:
+      - public/
+  only:
+    - main
