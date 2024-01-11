@@ -121,6 +121,27 @@ test-cuda-debug:
   needs:
     - build-cuda-debug
 
+test-nasm-release:
+  extends: .tests
+  needs:
+    - build-nasm-release
+
+test-nasm-debug:
+  extends: .tests
+  needs:
+    - build-nasm-debug
+
+test-cuda-nasm-release:
+  extends: .tests
+  needs:
+    - build-cuda-nasm-release
+
+test-cuda-nasm-debug:
+  extends: .tests
+  needs:
+    - build-cuda-nasm-debug
+
+
 doc-build:
   stage: build
   image: alpine
