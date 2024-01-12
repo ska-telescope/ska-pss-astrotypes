@@ -25,50 +25,6 @@ stages:
       # Execute pipeline automatically if triggered by a MR
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-.lint:
-  stage: lint-astrotypes
-  needs:
-    - set-up
-    - build-panda-release
-    - build-astrotypes-release
-  image: ubuntu:20.04
-  rules:
-      # Execute job automatically if commit is made to dev or main
-      # (this should only happen when code is merged to dev or main)
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
-      allow_failure: true
-
-      # Execute job if triggered by a schedule
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      allow_failure: true
-
-      # Execute job automatically if triggered by a MR
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      allow_failure: true
-  tags:
-    - k8srunner
-  script:
-    - apt-get -y update
-    - apt install -y cmake
-    - cmake --version
-    - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
-    - apt install -y clang-tidy
-    - clang-tidy --version
-    - cd build/astrotypes
-    - mkdir build && cd build
-    - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DPANDA_INSTALL_DIR=$CI_PROJECT_DIR/build/panda/install -DASTROTYPES_INSTALL_DIR=$CI_PROJECT_DIR/build/astrotypes/install
-      -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false ../source'
-    - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
-      -cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-modernize-use-nodiscard''
-      -quiet 2>&1 | tee clang-tidy.log ../source/astrotypes'
-  artifacts:
-    name: "$CI_COMMIT_REF_NAME-lint"
-    when: on_failure
-    paths:
-      - build/astrotypes/build/clang-tidy.log
-    expire_in: 1 d
-
 .builds:
   stage: build
   rules:
@@ -123,6 +79,48 @@ stages:
   script:
     - cd build
     - make test
+
+.lint:
+  stage: lint
+  needs:
+    - build-release
+  image: ubuntu:20.04
+  rules:
+      # Execute job automatically if commit is made to dev or main
+      # (this should only happen when code is merged to dev or main)
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+      allow_failure: true
+
+      # Execute job if triggered by a schedule
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      allow_failure: true
+
+      # Execute job automatically if triggered by a MR
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: true
+  tags:
+    - k8srunner
+  script:
+    - apt-get -y update
+    - apt install -y cmake
+    - cmake --version
+    - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
+    - apt install -y clang-tidy
+    - clang-tidy --version
+    - cd build/astrotypes
+    - mkdir build && cd build
+    - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      -DPANDA_INSTALL_DIR=$CI_PROJECT_DIR/build/panda/install -DASTROTYPES_INSTALL_DIR=$CI_PROJECT_DIR/build/astrotypes/install
+      -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false ../source'
+    - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
+      -cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-modernize-use-nodiscard''
+      -quiet 2>&1 | tee clang-tidy.log ../source/astrotypes'
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME-lint"
+    when: on_failure
+    paths:
+      - build/astrotypes/build/clang-tidy.log
+    expire_in: 1 d
 
 build-release:
   extends: .builds
