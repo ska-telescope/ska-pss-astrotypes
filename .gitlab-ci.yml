@@ -2,8 +2,8 @@ variables:
     GIT_STRATEGY: clone
     CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.6/
 stages:
-  - lint
   - build
+  - lint
   - test
   - publish-docs
 
@@ -27,22 +27,7 @@ stages:
 
 .builds:
   stage: build
-  rules:
-      # Execute pipeline automatically if commit is made to dev or main
-      # (this should only happen when code is merged to dev or main)
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
-
-      # Create but do not execute pipeline for feature branches on commit,
-      # or if created via the gitlab GUI
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api"
-      when: manual
-      allow_failure: false
-
-      # Execute pipeline if triggered by a schedule
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
-      # Execute pipeline automatically if triggered by a MR
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  extends: .common
   tags:
     - ubuntu-18.04
   script:
@@ -56,31 +41,7 @@ stages:
       - build/*
     expire_in: 1 d
 
-.tests:
-  stage: test
-  rules:
-      # Execute pipeline automatically if commit is made to dev or main
-      # (this should only happen when code is merged to dev or main)
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
-
-      # Create but do not execute pipeline for feature branches on commit,
-      # or if created via the gitlab GUI
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api"
-      when: manual
-      allow_failure: false
-
-      # Execute pipeline if triggered by a schedule
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
-      # Execute pipeline automatically if triggered by a MR
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  tags:
-    - ubuntu-18.04
-  script:
-    - cd build
-    - make test
-
-.lint:
+lint:
   stage: lint
   needs:
     - build-release
@@ -121,6 +82,15 @@ stages:
     paths:
       - build/astrotypes/build/clang-tidy.log
     expire_in: 1 d
+  
+.tests:
+  stage: test
+  extends: .common
+  tags:
+    - ubuntu-18.04
+  script:
+    - cd build
+    - make test
 
 build-release:
   extends: .builds
