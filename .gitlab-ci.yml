@@ -95,7 +95,6 @@ lint:
     - cd build/astrotypes
     - mkdir build && cd build
     - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DPANDA_INSTALL_DIR=$CI_PROJECT_DIR/build/panda/install -DASTROTYPES_INSTALL_DIR=$CI_PROJECT_DIR/build/astrotypes/install
       -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false ../source'
     - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
       -cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-modernize-use-nodiscard''
