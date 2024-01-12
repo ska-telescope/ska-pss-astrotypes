@@ -54,14 +54,18 @@ set-up:
   tags:
     - ubuntu-18.04
   script:
-    - mkdir build && cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
+    - cd build
+    - mkdir astrotypes && cd astrotypes
+    - git clone https://gitlab.com/ska-telescope/pss/ska-pss-astrotypes.git source
+    - mkdir build install
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ../source
     - make -j
-    - make -j install
+    - make install
   artifacts:
-    name: "$CI_COMMIT_REF_NAME-build"
+    name: "$CI_COMMIT_REF_NAME-astrotypes-install"
     paths:
-      - build/*
+      - build/astrotypes/install/*
     expire_in: 1 d
 
 lint:
@@ -135,7 +139,7 @@ build-cuda-release:
 build-cuda-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true"
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=true"
 
 build-nasm-release:
   extends: .builds
@@ -145,7 +149,7 @@ build-nasm-release:
 build-nasm-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
 
 build-cuda-nasm-release:
   extends: .builds
@@ -155,7 +159,7 @@ build-cuda-nasm-release:
 build-cuda-nasm-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true -DENABLE_NASM=true"
+    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=true -DENABLE_NASM=true"
 
 test-release:
   extends: .tests
@@ -202,10 +206,11 @@ doc-build:
   stage: build
   image: alpine
   script:
-    - apk update && apk add build-base cmake doxygen graphviz ttf-freefont
+    - apk update && apk add git build-base cmake3 doxygen graphviz ttf-freefont
+    - git clone https://gitlab.com/ska-telescope/pss/ska-pss-astrotypes.git
     - mkdir build-docs
     - cd build-docs
-    - cmake -DCMAKE_BUILD_TYPE=documentation ../
+    - cmake3 -DCMAKE_BUILD_TYPE=documentation -DPANDA_SOURCE_DIR=../panda/ -DASTROTYPES_SOURCE_DIR=../astrotypes ../
     - make doc
   artifacts:
     paths:
