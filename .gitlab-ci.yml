@@ -2,7 +2,6 @@ variables:
     GIT_STRATEGY: clone
     CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.6/
 stages:
-  - set-up
   - build
   - lint
   - test
@@ -26,53 +25,24 @@ stages:
       # Execute pipeline automatically if triggered by a MR
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-# This job sets up a symbolic link to from the root repository to build/ska-pss-astrotypes/source.
-# astrotypes/build
-# astrotypes/install
-# astrotypes/source
-# We put the above structure inside an additional 'build' directory to comply with SKAO CICD Pipeline conventions.
-set-up:
-  stage: set-up
-  extends: .common
-  script:
-    - mkdir build && cd build
-    - mkdir astrotypes && cd astrotypes
-    - cd ../../
-    - ln -s $CI_PROJECT_DIR/ build/astrotypes/source
-  tags:
-    - ubuntu-18.04
-  artifacts:
-    name: "$CI_COMMIT_REF_NAME-cheetah"
-    paths:
-      - build/astrotypes/source/*
-    expire_in: 1 d
-
 .builds:
-  needs: 
-    - set-up
   stage: build
   extends: .common
   tags:
     - ubuntu-18.04
   script:
-    - cd build
-    - mkdir astrotypes && cd astrotypes
-    - git clone https://gitlab.com/ska-telescope/pss/ska-pss-astrotypes.git source
-    - mkdir build install
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ../source
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
     - make -j
-    - make install
+    - make -j install
   artifacts:
-    name: "$CI_COMMIT_REF_NAME-astrotypes-install"
+    name: "$CI_COMMIT_REF_NAME-build"
     paths:
-      - build/astrotypes/install/*
+      - build/*
     expire_in: 1 d
 
 lint:
   stage: lint
-  needs: 
-    - set-up
   image: ubuntu:20.04
   rules:
       # Execute job automatically if commit is made to dev or main
@@ -96,7 +66,6 @@ lint:
     - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
     - apt install -y clang-tidy
     - clang-tidy --version
-    - cd build/astrotypes
     - mkdir build && cd build
     - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false ../source'
@@ -107,7 +76,7 @@ lint:
     name: "$CI_COMMIT_REF_NAME-lint"
     when: on_failure
     paths:
-      - build/astrotypes/build/clang-tidy.log
+      - /build/clang-tidy.log
     expire_in: 1 d
   
 .tests:
