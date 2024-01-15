@@ -72,7 +72,6 @@ lint:
   stage: lint
   needs:
     - set-up
-    - build-release
   image: ubuntu:20.04
   rules:
       # Execute job automatically if commit is made to dev or main
@@ -111,8 +110,6 @@ lint:
     expire_in: 1 d
   
 .tests:
-  needs:
-    - set-up
   stage: test
   extends: .common
   tags:
