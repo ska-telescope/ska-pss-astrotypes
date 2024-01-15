@@ -48,7 +48,8 @@ set-up:
     expire_in: 1 d
 
 .builds:
-  needs: set-up
+  needs: 
+    - set-up
   stage: build
   extends: .common
   tags:
@@ -70,7 +71,7 @@ set-up:
 
 lint:
   stage: lint
-  needs:
+  needs: 
     - set-up
   image: ubuntu:20.04
   rules:
