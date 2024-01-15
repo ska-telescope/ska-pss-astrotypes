@@ -66,12 +66,13 @@ lint:
     - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
     - apt install -y clang-tidy
     - clang-tidy --version
-    - mkdir build && cd build
+    - [ -d build ] || mkdir build
+    - cd build
     - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false ../source'
+      -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false'
     - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
       -cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-modernize-use-nodiscard''
-      -quiet 2>&1 | tee clang-tidy.log ../source/astrotypes'
+      -quiet 2>&1 | tee clang-tidy.log'
   artifacts:
     name: "$CI_COMMIT_REF_NAME-lint"
     when: on_failure
