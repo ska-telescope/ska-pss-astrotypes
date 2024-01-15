@@ -66,8 +66,6 @@ lint:
     - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
     - apt install -y clang-tidy
     - clang-tidy --version
-    - [ -d build ] || mkdir build
-    - cd build
     - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false'
     - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
