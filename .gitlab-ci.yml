@@ -43,7 +43,7 @@ stages:
 
 lint:
   stage: lint
-  image: ubuntu:20.04
+  image: ubuntu:22.04
   rules:
       # Execute job automatically if commit is made to dev or main
       # (this should only happen when code is merged to dev or main)
@@ -110,12 +110,12 @@ build-cuda-debug:
 build-nasm-release:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
 
 build-nasm-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
+    CMAKE_FLAGS: "DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
 
 build-cuda-nasm-release:
   extends: .builds
