@@ -1,6 +1,6 @@
 variables:
     GIT_STRATEGY: clone
-    CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.6/
+    CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7/
 stages:
   - build
   - lint
@@ -29,7 +29,7 @@ stages:
   stage: build
   extends: .common
   tags:
-    - ubuntu-18.04
+    - ubuntu-22.04
   script:
     - mkdir build && cd build
     - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
@@ -82,7 +82,7 @@ lint:
   stage: test
   extends: .common
   tags:
-    - ubuntu-18.04
+    - ubuntu-22.04
   script:
     - cd build
     - make test
