@@ -102,6 +102,11 @@ build-nasm-release:
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
 
+build-nasm-debug:
+  extends: .builds
+  variables:
+    CMAKE_FLAGS: "DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
+
 test-release:
   extends: .tests
   needs:
