@@ -90,12 +90,12 @@ lint:
 build-release:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false"
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=false"
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
 build-nasm-release:
   extends: .builds
