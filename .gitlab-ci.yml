@@ -1,6 +1,6 @@
 variables:
     GIT_STRATEGY: clone
-    CUDA_PATH: -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7/
+
 stages:
   - build
   - lint
@@ -90,22 +90,12 @@ lint:
 build-release:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false"
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
   variables:
-    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=false"
-
-build-cuda-release:
-  extends: .builds
-  variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true"
-
-build-cuda-debug:
-  extends: .builds
-  variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=true"
+    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
 build-nasm-release:
   extends: .builds
@@ -117,16 +107,6 @@ build-nasm-debug:
   variables:
     CMAKE_FLAGS: "DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
 
-build-cuda-nasm-release:
-  extends: .builds
-  variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=true -DENABLE_NASM=true"
-
-build-cuda-nasm-debug:
-  extends: .builds
-  variables:
-    CMAKE_FLAGS: "$CUDA_PATH -DCMAKE_BUILD_TYPE=debug -DENABLE_CUDA=true -DENABLE_NASM=true"
-
 test-release:
   extends: .tests
   needs:
@@ -137,16 +117,6 @@ test-debug:
   needs:
     - build-debug
 
-test-cuda-release:
-  extends: .tests
-  needs:
-    - build-cuda-release
-
-test-cuda-debug:
-  extends: .tests
-  needs:
-    - build-cuda-debug
-
 test-nasm-release:
   extends: .tests
   needs:
@@ -156,17 +126,6 @@ test-nasm-debug:
   extends: .tests
   needs:
     - build-nasm-debug
-
-test-cuda-nasm-release:
-  extends: .tests
-  needs:
-    - build-cuda-nasm-release
-
-test-cuda-nasm-debug:
-  extends: .tests
-  needs:
-    - build-cuda-nasm-debug
-
 
 doc-build:
   stage: build
