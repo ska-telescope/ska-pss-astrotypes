@@ -29,7 +29,7 @@ stages:
   stage: build
   extends: .common
   tags:
-    - ubuntu-18.04
+    - ubuntu-22.04
   script:
     - mkdir build && cd build
     - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
@@ -82,7 +82,7 @@ lint:
   stage: test
   extends: .common
   tags:
-    - ubuntu-18.04
+    - ubuntu-22.04
   script:
     - cd build
     - make test
