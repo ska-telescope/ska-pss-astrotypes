@@ -2,8 +2,8 @@ variables:
     GIT_STRATEGY: clone
 
 stages:
-  - build
   - lint
+  - build
   - test
   - publish-docs
 
@@ -24,22 +24,6 @@ stages:
 
       # Execute pipeline automatically if triggered by a MR
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
-.builds:
-  stage: build
-  extends: .common
-  tags:
-    - ubuntu-22.04
-  script:
-    - mkdir build && cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
-    - make -j
-    - make -j install
-  artifacts:
-    name: "$CI_COMMIT_REF_NAME-build"
-    paths:
-      - build/*
-    expire_in: 1 d
 
 lint:
   stage: lint
@@ -77,7 +61,23 @@ lint:
     paths:
       - /build/clang-tidy.log
     expire_in: 1 d
-  
+
+.builds:
+  stage: build
+  extends: .common
+  tags:
+    - ubuntu-22.04
+  script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
+    - make -j
+    - make -j install
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME-build"
+    paths:
+      - build/*
+    expire_in: 1 d
+
 .tests:
   stage: test
   extends: .common
