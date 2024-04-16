@@ -15,7 +15,7 @@ stages:
 
       # Create but do not execute pipeline for feature branches on commit,
       # or if created via the gitlab GUI
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api"
+    - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api") && $BUILD_TYPE == "release"
       when: manual
       allow_failure: false
 
@@ -90,42 +90,54 @@ lint:
 build-release:
   extends: .builds
   variables:
+    BUILD_TYPE: release
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
   variables:
+    BUILD_TYPE: debug
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
 build-nasm-release:
   extends: .builds
   variables:
+  BUILD_TYPE: release
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
 
 build-nasm-debug:
   extends: .builds
   variables:
+    BUILD_TYPE: debug
     CMAKE_FLAGS: "DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
 
 test-release:
   extends: .tests
   needs:
     - build-release
+  variables:
+    BUILD_TYPE: release
 
 test-debug:
   extends: .tests
   needs:
     - build-debug
+  variables:
+    BUILD_TYPE: debug
 
 test-nasm-release:
   extends: .tests
   needs:
     - build-nasm-release
+  variables:
+    BUILD_TYPE: release
 
 test-nasm-debug:
   extends: .tests
   needs:
     - build-nasm-debug
+  variables:
+    BUILD_TYPE: debug
 
 doc-build:
   stage: build
