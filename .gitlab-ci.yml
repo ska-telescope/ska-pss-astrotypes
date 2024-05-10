@@ -85,7 +85,7 @@ lint:
     - ubuntu-22.04
   script:
     - cd build
-    - make test
+    - ctest --output-on-failure --force-new-ctest-process
 
 build-release:
   extends: .builds
