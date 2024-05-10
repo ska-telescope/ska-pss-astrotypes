@@ -85,7 +85,7 @@ lint:
     - ubuntu-22.04
   script:
     - cd build
-    - make test
+    - ctest --output-on-failure --force-new-ctest-process
 
 build-release:
   extends: .builds
@@ -99,18 +99,6 @@ build-debug:
     BUILD_TYPE: debug
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
-build-nasm-release:
-  extends: .builds
-  variables:
-    BUILD_TYPE: release
-    CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release -DENABLE_NASM=true"
-
-build-nasm-debug:
-  extends: .builds
-  variables:
-    BUILD_TYPE: debug
-    CMAKE_FLAGS: "DCMAKE_BUILD_TYPE=debug -DENABLE_NASM=true"
-
 test-release:
   extends: .tests
   needs:
@@ -122,20 +110,6 @@ test-debug:
   extends: .tests
   needs:
     - build-debug
-  variables:
-    BUILD_TYPE: debug
-
-test-nasm-release:
-  extends: .tests
-  needs:
-    - build-nasm-release
-  variables:
-    BUILD_TYPE: release
-
-test-nasm-debug:
-  extends: .tests
-  needs:
-    - build-nasm-debug
   variables:
     BUILD_TYPE: debug
 
