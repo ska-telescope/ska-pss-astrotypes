@@ -15,7 +15,7 @@ stages:
 
       # Create but do not execute pipeline for feature branches on commit,
       # or if created via the gitlab GUI
-    - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api") && $BUILD_TYPE == "release"
+    - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "api")
       when: manual
       allow_failure: false
 
@@ -84,19 +84,24 @@ lint:
   tags:
     - ubuntu-22.04
   script:
-    - cd build
-    - ctest --output-on-failure --force-new-ctest-process
+    - cd build && mkdir reports
+    - ctest --output-on-failure --force-new-ctest-process --output-junit reports/test-results-$SPIN.xml
+  artifacts:
+    paths:
+      - build/
+    reports:
+      junit: build/reports/test-results-$SPIN.xml
 
 build-release:
   extends: .builds
   variables:
-    BUILD_TYPE: release
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
   variables:
-    BUILD_TYPE: debug
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
 test-release:
@@ -104,14 +109,16 @@ test-release:
   needs:
     - build-release
   variables:
-    BUILD_TYPE: release
+    SPIN: release
 
 test-debug:
   extends: .tests
   needs:
     - build-debug
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
   variables:
-    BUILD_TYPE: debug
+    SPIN: debug
 
 doc-build:
   stage: build
