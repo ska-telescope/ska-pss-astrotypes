@@ -9,9 +9,9 @@ stages:
 
 .common:
   rules:
-      # Execute pipeline automatically if commit is made to dev or main
-      # (this should only happen when code is merged to dev or main)
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+      # Execute pipeline automatically if commit is made to main
+      # (this should only happen when code is merged to main)
+    - if: $CI_COMMIT_BRANCH == "main"
 
       # Create but do not execute pipeline for feature branches on commit,
       # or if created via the gitlab GUI
@@ -29,9 +29,9 @@ lint:
   stage: lint
   image: ubuntu:22.04
   rules:
-      # Execute job automatically if commit is made to dev or main
-      # (this should only happen when code is merged to dev or main)
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+      # Execute job automatically if commit is made to main
+      # (this should only happen when code is merged to main)
+    - if: $CI_COMMIT_BRANCH == "main"
       allow_failure: true
 
       # Execute job if triggered by a schedule
@@ -100,7 +100,7 @@ build-release:
 build-debug:
   extends: .builds
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "main"
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -116,7 +116,7 @@ test-debug:
   needs:
     - build-debug
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "main"
   variables:
     SPIN: debug
 
