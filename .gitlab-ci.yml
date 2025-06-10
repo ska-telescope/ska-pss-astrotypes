@@ -99,8 +99,6 @@ build-release:
 
 build-debug:
   extends: .builds
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -115,8 +113,6 @@ test-debug:
   extends: .tests
   needs:
     - build-debug
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
   variables:
     SPIN: debug
 
