@@ -65,8 +65,6 @@ lint:
 .builds:
   stage: build
   extends: .common
-  tags:
-    - ds-psi-pss-worker-1b
   script:
     - mkdir build && cd build
     - cmake -DCMAKE_INSTALL_PREFIX=../install $CMAKE_FLAGS ..
@@ -81,8 +79,6 @@ lint:
 .tests:
   stage: test
   extends: .common
-  tags:
-    - ds-psi-pss-worker-1b
   script:
     - cd build && mkdir reports
     - ctest --output-on-failure --force-new-ctest-process --output-junit reports/test-results-$SPIN.xml
@@ -94,11 +90,15 @@ lint:
 
 build-release:
   extends: .builds
+  tags:
+    - ubuntu-22.04
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
+  tags:
+    - ds-psi-pss-worker-1b
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -106,6 +106,8 @@ test-release:
   extends: .tests
   needs:
     - build-release
+  tags:
+    - ubuntu-22.04
   variables:
     SPIN: release
 
@@ -113,6 +115,8 @@ test-debug:
   extends: .tests
   needs:
     - build-debug
+  tags:
+    - ds-psi-pss-worker-1b
   variables:
     SPIN: debug
 
