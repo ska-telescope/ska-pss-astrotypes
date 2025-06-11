@@ -98,7 +98,7 @@ build-release:
 build-debug:
   extends: .builds
   tags:
-    - ubuntu-22.04
+    - ds-psi-pss-worker-1b
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -116,7 +116,7 @@ test-debug:
   needs:
     - build-debug
   tags:
-    - ubuntu-22.04
+    - ds-psi-pss-worker-1b
   variables:
     SPIN: debug
 
