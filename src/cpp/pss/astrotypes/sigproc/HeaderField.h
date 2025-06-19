@@ -124,10 +124,13 @@ class HeaderFieldWithTolerance : public HeaderField<T>
         typedef HeaderField<T> BaseT;
 
     public:
+        using HeaderField<T>::operator=;
+
+    public:
         HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const&);
         HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const&, HeaderFieldWithTolerance const&);
         HeaderFieldWithTolerance& operator=(T const& var);
-        
+
         bool operator==(const HeaderFieldBase&) const override;
         bool operator==(const HeaderFieldWithTolerance&) const;
 
