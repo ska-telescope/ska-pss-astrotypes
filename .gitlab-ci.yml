@@ -42,7 +42,7 @@ lint:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: true
   tags:
-    - aws-ska-default-xlarge
+    - ska-default-xlarge
   script:
     - apt-get -y update
     - apt install -y cmake
