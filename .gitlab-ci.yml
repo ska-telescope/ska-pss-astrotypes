@@ -1,5 +1,17 @@
+default:
+  image:
+    name: ${CPU_IMAGE}
+    pull_policy: always
+  tags:
+    - ${RUNNER_TAG}
+
 variables:
-    GIT_STRATEGY: clone
+  GIT_STRATEGY: clone
+  RUNNER_TAG: "pss-dokimi-docker"  # Default runner for all jobs
+  LINT_RUNNER_TAG: "pss-dokimi-docker"  # Runner for lint jobs
+  CI_CPU_IMAGE_TAG: "ci-ubuntu22.04"
+  CI_REGISTRY_IMAGE: "registry.gitlab.com/ska-telescope/pss/ska-pss-astrotypes"
+  CPU_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_CPU_IMAGE_TAG}
 
 stages:
   - lint
@@ -24,10 +36,12 @@ stages:
 
       # Execute pipeline automatically if triggered by a MR
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    
+      # Execute pipeline automatically if triggered via the web GUI
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 lint:
   stage: lint
-  image: ubuntu:22.04
   rules:
       # Execute job automatically if commit is made to main
       # (this should only happen when code is merged to main)
@@ -42,16 +56,12 @@ lint:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: true
   tags:
-    - ska-default-xlarge
+    - ${LINT_RUNNER_TAG}
   script:
-    - apt-get -y update
-    - apt install -y cmake
     - cmake --version
-    - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
-    - apt install -y clang-tidy
     - clang-tidy --version
-    - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DCMAKE_BUILD_TYPE=release -DENABLE_CUDA=false'
+    - mkdir build && cd build
+    - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=release ..'
     - 'run-clang-tidy -checks=''cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*,
       -cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-modernize-use-nodiscard''
       -quiet 2>&1 | tee clang-tidy.log'
@@ -59,7 +69,7 @@ lint:
     name: "$CI_COMMIT_REF_NAME-lint"
     when: on_failure
     paths:
-      - /build/clang-tidy.log
+      - build/clang-tidy.log
     expire_in: 1 d
 
 .builds:
@@ -90,15 +100,11 @@ lint:
 
 build-release:
   extends: .builds
-  tags:
-    - ubuntu-22.04
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
-  tags:
-    - ds-psi-pss-worker-1b
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -106,8 +112,6 @@ test-release:
   extends: .tests
   needs:
     - build-release
-  tags:
-    - ubuntu-22.04
   variables:
     SPIN: release
 
@@ -115,20 +119,15 @@ test-debug:
   extends: .tests
   needs:
     - build-debug
-  tags:
-    - ds-psi-pss-worker-1b
   variables:
     SPIN: debug
 
 doc-build:
   stage: build
-  image: alpine
+  extends: .common
   script:
-    - apk update && apk add git build-base cmake doxygen graphviz ttf-freefont
-    - git clone https://gitlab.com/ska-telescope/pss/ska-pss-astrotypes.git
-    - mkdir build-docs
-    - cd build-docs
-    - cmake -DCMAKE_BUILD_TYPE=documentation -DPANDA_SOURCE_DIR=../panda/ -DASTROTYPES_SOURCE_DIR=../astrotypes ../
+    - mkdir build-docs && cd build-docs
+    - cmake -DCMAKE_BUILD_TYPE=documentation ..
     - make doc
   artifacts:
     paths:

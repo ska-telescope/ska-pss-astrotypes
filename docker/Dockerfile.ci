@@ -1,0 +1,37 @@
+# ================================================================================
+# ASTROTYPES CI Build Container
+# ================================================================================
+# Minimal container for CI/CD pipeline builds and docs generation.
+# ================================================================================
+
+# Use buildpack-deps which includes git, curl, SSL certs, and build tools
+FROM buildpack-deps:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC
+
+# Install only CI dependencies.
+# (buildpack-deps already includes: git, curl, ca-certificates, openssl, build-essential)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cmake \
+        pkg-config \
+        libboost-all-dev \
+        libfftw3-dev \
+        clang-tidy \
+        doxygen \
+        graphviz \
+        fonts-freefont-ttf \
+    && rm -rf /var/lib/apt/lists/*
+
+# Explicit SSL/TLS configuration for git in Kubernetes environments
+# where default cert settings can be overridden.
+RUN git config --system http.sslCAInfo /etc/ssl/certs/ca-certificates.crt && \
+    git config --system http.sslVerify true
+
+ENV GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt \
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
+    CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]
