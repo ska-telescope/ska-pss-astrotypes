@@ -31,6 +31,7 @@
 #include "Length.h"
 #include "Angle.h"
 #include "Utilities.h"
+#include "PhysicalConstants.h"
 #include <boost/units/io.hpp>
 
 #endif // PSS_ASTROTYPES_UNITS_UNITS_H
