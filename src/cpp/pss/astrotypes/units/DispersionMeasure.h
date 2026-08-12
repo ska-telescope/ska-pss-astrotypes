@@ -1,7 +1,7 @@
 /*
- * MIT License
+ * The MIT License (MIT)
  *
- * Copyright (c) 2018-2026 PulsarSearchSoft
+ * Copyright (c) 2016-2026 The SKA organisation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,15 +28,11 @@
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpragmas"
-#include <boost/units/quantity.hpp>
-#include <boost/units/conversion.hpp>
 #include <boost/units/systems/cgs/length.hpp>
-#include <boost/units/io.hpp>
 #include <boost/units/pow.hpp>
-#include <boost/units/derived_dimension.hpp>
-#include <boost/units/physical_dimensions/length.hpp>
-#include <boost/units/base_units/astronomical/parsec.hpp>
 #pragma GCC diagnostic pop
+
+#include "astrotypes/units/Length.h"
 
 namespace pss {
 namespace astrotypes {
@@ -62,7 +58,7 @@ namespace units {
  */
 
 using DispersionMeasureUnit =
-    decltype(boost::units::astronomical::parsec_base_unit::unit_type{}
+    decltype(parsec
              /
              boost::units::pow<3>(boost::units::cgs::centimeter)
             );
