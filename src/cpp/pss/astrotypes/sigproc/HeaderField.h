@@ -1,7 +1,7 @@
 /*
- * MIT License
+ * The MIT License (MIT)
  *
- * Copyright (c) 2018 PulsarSearchSoft
+ * Copyright (c) 2018-2026 The SKA organisation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,12 @@
  */
 #ifndef PSS_ASTROTYPES_SIGPROC_HEADERFIELD_H
 #define PSS_ASTROTYPES_SIGPROC_HEADERFIELD_H
+
 #include "pss/astrotypes/sigproc/detail/SigProcVariable.h"
 #include "pss/astrotypes/utils/Optional.h"
+#include <boost/units/io.hpp>
 #include <string>
 #include <vector>
-
 
 namespace pss {
 namespace astrotypes {
@@ -36,43 +37,56 @@ namespace sigproc {
 class Header;
 
 /**
- * @brief class to provide a virtual lookup table for read/write the varoious types
- *        of SigProcVariables
- * @details
+ *  @brief   Class to provide a virtual lookup table for reading/writing the
+ *           various types of SigProc variables.
  */
-
 class HeaderFieldBase
 {
     protected:
-        // allows us to hide HeaderFields from the writer
-        HeaderFieldBase() {};
+        // Allows us to hide HeaderFields from the writer
+        HeaderFieldBase(){};
 
-        /// add the provided field as a read_only parameter
-        void add_read(SigProcLabel const& header_label, HeaderFieldBase& field, Header& header);
+        // Add the provided field as a read-only parameter
+        void add_read(SigProcLabel const& header_label
+                      , HeaderFieldBase& field
+                      , Header& header
+                     );
 
     public:
-        // registers the Field to be read/written by the Header parser
+        // Registers the Field to be read/written by the Header parser
         HeaderFieldBase(SigProcLabel const& header_name, Header& h);
-        ~HeaderFieldBase() {}; // virtual not needed, we never expect to pass these around
+        ~HeaderFieldBase(){}; // Virtual not needed, we never expect to pass these around
 
-        /// read into variable
-        // @return the number of bytes read
-        virtual unsigned read(std::istream &) { return 0; };
+        /**
+         *  @brief   Read from a stream into a variable
+         *  @return   The number of bytes read
+         */
+        virtual unsigned read(std::istream&) { return 0; };
 
-        /// serialise a variable to sigproc header format
-        // @return the number of bytes written
-        virtual unsigned write(std::ostream &) const { return 0; };
+        /**
+         *  @brief   Write a variable in sigproc header format to a stream
+         *  @return   The number of bytes written
+         */
+        virtual unsigned write(std::ostream&) const { return 0; };
 
-        /// an information string about the value in the field (for debugging etc)
-        virtual void write_info(std::ostream &) const { };
+        /**
+         *  @brief   An information string about the value in the field (for debugging)
+         */
+        virtual void write_info(std::ostream&) const {};
 
-        /// return the required header string to be used in info output
+        /**
+         *  @return   The required header string to be used in info output
+         */
         virtual std::string const& header_info(std::string const& h) const { return h; };
 
-        /// reset the variable to undefined state
+        /**
+         *   @brief   Reset the variable to undefined state
+         */
         virtual void reset() = 0;
 
-        /// return true if the variable has been set, false otherwise
+        /**
+         *  @return   True if the variable has been set, false otherwise
+         */
         virtual bool is_set() const = 0;
 
         virtual bool operator==(const HeaderFieldBase&) const { return true; };
@@ -83,18 +97,18 @@ class HeaderFieldBase
 template<typename T>
 class HeaderField : public HeaderFieldBase
 {
-        typedef HeaderFieldBase BaseT;
+        using BaseT = HeaderFieldBase;
 
     protected:
-        // for expansion only, not to be used as a public interface
-        HeaderField() {};
+        // For expansion only, not to be used as a public interface
+        HeaderField(){};
 
     public:
-        /// add the provided field as a read/write parameters
+        // Add the provided field as a read/write parameter
         HeaderField(SigProcLabel const& header_label, Header& header);
         HeaderField(SigProcLabel const& header_label, Header& header, T const& to_copy);
 
-        // Warning HeaderFieldBase must be convertible to HeaderField
+        // Warning: HeaderFieldBase must be convertible to HeaderField
         HeaderField(SigProcLabel const& header_label, Header& header, HeaderField const&);
 
         operator T const&() const { return *_var; }
@@ -116,19 +130,27 @@ class HeaderField : public HeaderFieldBase
 };
 
 /**
- * @brief specialisation to allow the == operator to return true if the values are within specified tolerance
+ *  @brief   Specialisation to allow the operator== to return true if the
+ *           values are within specified tolerance.
  */
 template<typename T, typename ToleranceType>
 class HeaderFieldWithTolerance : public HeaderField<T>
 {
-        typedef HeaderField<T> BaseT;
+        using BaseT = HeaderField<T>;
 
     public:
         using HeaderField<T>::operator=;
 
     public:
-        HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const&);
-        HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const&, HeaderFieldWithTolerance const&);
+        HeaderFieldWithTolerance(SigProcLabel const& header_label
+                                 , Header& header
+                                 , ToleranceType const&
+                                );
+        HeaderFieldWithTolerance(SigProcLabel const& header_label
+                                 , Header& header
+                                 , ToleranceType const&
+                                 , HeaderFieldWithTolerance const&
+                                );
         HeaderFieldWithTolerance& operator=(T const& var);
 
         bool operator==(const HeaderFieldBase&) const override;
@@ -138,30 +160,33 @@ class HeaderFieldWithTolerance : public HeaderField<T>
         ToleranceType _tolerance;
 };
 
-
 /**
- * @brief specialisation for writing and reading the sigproc vector type
- * @details
- *     A start of a vector in the header is marked with a start_label (e.g. FREQUENCY_START)
- *     A end of a vector in the header is marked with an end_label    (e.g. FREQUENCY_END)
- *     In between each element is marked with its own item_tag        (e.g. fchannel)
+ *  @brief   Specialisation for writing and reading the sigproc vector type
+ *
+ *  @details   The start of a vector in the header is marked with a start label
+ *             (e.g. FREQUENCY_START). The end of a vector in the header is
+ *             marked with an end label (e.g. FREQUENCY_END). In between, each
+ *             element is marked with its own item tag (e.g. fchannel).
  */
 template<typename T>
 class HeaderField<std::vector<T>> : public HeaderFieldBase
 {
-        typedef HeaderFieldBase BaseT;
-        // vectors are marked with start and end tags
-        class NullField : public HeaderFieldBase {
+        using BaseT = HeaderFieldBase;
+
+        // Vectors are marked with start and end tags
+        class NullField : public HeaderFieldBase
+        {
             public:
-                NullField() {}
-                // do content other than the label
+                NullField(){}
+                // No content other than the label
                 bool is_set() const override { return false; }
                 void reset() override {};
                 void operator=(const HeaderFieldBase&) override {};
         };
 
-        class ItemField : public HeaderFieldBase {
-            // only needs to read
+        class ItemField : public HeaderFieldBase
+        {
+            // Only needs to read
             public:
                 ItemField(std::vector<T>& vec) : _vec(vec) {}
                 bool is_set() const override { return false; }
@@ -174,8 +199,17 @@ class HeaderField<std::vector<T>> : public HeaderFieldBase
         };
 
     public:
-        HeaderField(SigProcLabel const& start_label, SigProcLabel const& item_label, SigProcLabel const& end_label, Header& header);
-        HeaderField(SigProcLabel const& start_label, SigProcLabel const& item_label, SigProcLabel const& end_label, Header& header, HeaderField const& copy);
+        HeaderField(SigProcLabel const& start_label
+                    , SigProcLabel const& item_label
+                    , SigProcLabel const& end_label
+                    , Header& header
+                   );
+        HeaderField(SigProcLabel const& start_label
+                    , SigProcLabel const& item_label
+                    , SigProcLabel const& end_label
+                    , Header& header
+                    , HeaderField const& copy
+                   );
 
         operator std::vector<T> const&() const { return _var; }
         operator std::vector<T>&() { return _var; }
