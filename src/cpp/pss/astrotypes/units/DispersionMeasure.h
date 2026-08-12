@@ -32,18 +32,14 @@
 #include <boost/units/pow.hpp>
 #pragma GCC diagnostic pop
 
-<<<<<<< HEAD
 #include "pss/astrotypes/units/Length.h"
-=======
-#include "astrotypes/units/Length.h"
->>>>>>> 2c96f6f7bcb41a3a604037d1c90680180f4463ad
 
 namespace pss {
 namespace astrotypes {
 namespace units {
 
 /**
- *  @brief   Representtive of a Dispersion Measure (dimensions and units)
+ *  @brief   Representation of a Dispersion Measure (dimensions and units)
  *
  *  @details   Implemented using the boost units library. DispersionMeasure will
  *             be a boost::units::quantity with the base unit parsec/cm^3. Note
@@ -56,11 +52,9 @@ namespace units {
  *  DispersionMeasure<float> dm_float(1.6 * parsecs_per_cube_cm); // multiple parsecs/cm^3
  *  DispersionMeasure<double> dm_dble(1.0 * parsec_per_cube_cm);  // a single parsec/cm^3
  *                                                                // n.b. just syntactical sugar, it refers to the same unit
- *
  *  @endcode
  *
  */
-
 using DispersionMeasureUnit =
     decltype(parsec
              /
