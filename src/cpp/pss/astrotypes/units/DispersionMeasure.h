@@ -32,7 +32,11 @@
 #include <boost/units/pow.hpp>
 #pragma GCC diagnostic pop
 
+<<<<<<< HEAD
 #include "pss/astrotypes/units/Length.h"
+=======
+#include "astrotypes/units/Length.h"
+>>>>>>> 2c96f6f7bcb41a3a604037d1c90680180f4463ad
 
 namespace pss {
 namespace astrotypes {
