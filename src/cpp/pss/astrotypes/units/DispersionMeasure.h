@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2026 The SKA organisation
+ * Copyright (c) 2018-2026 The SKA organisation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@
 #pragma GCC diagnostic ignored "-Wpragmas"
 #include <boost/units/systems/cgs/length.hpp>
 #include <boost/units/pow.hpp>
+#include <boost/units/quantity.hpp>
 #pragma GCC diagnostic pop
 
 #include "pss/astrotypes/units/Length.h"
