@@ -31,6 +31,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/base_units/astronomical/parsec.hpp>
+#include <boost/units/make_scaled_unit.hpp>
 #pragma GCC diagnostic pop
 
 namespace pss {
