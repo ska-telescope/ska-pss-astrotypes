@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased changes
+
+### New
+
+* AT4-1812 add speed of light
+
 ## 1.0.0 (2025-06-09)
 
 ### New
