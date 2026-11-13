@@ -47,13 +47,12 @@ namespace units {
  *             that you must specify the units when initialising the variable.
  *
  *  @example
- *  @code
- *  #include "pss/astrotypes/DispersionMeasure.h"
+ *      @code
+ *          #include "pss/astrotypes/DispersionMeasure.h"
  *
- *  DispersionMeasure<float> dm_float(1.6 * parsecs_per_cube_cm); // multiple parsecs/cm^3
- *  DispersionMeasure<double> dm_dble(1.0 * parsec_per_cube_cm);  // a single parsec/cm^3
- *                                                                // n.b. just syntactical sugar, it refers to the same unit
- *  @endcode
+ *          DispersionMeasure<float> dm_float(1.6 * parsecs_per_cube_cm); // Multiple parsecs/cm^3
+ *          DispersionMeasure<double> dm_dble(1.0 * parsec_per_cube_cm);  // A single parsec/cm^3 (just syntactical sugar, it refers to the same unit)
+ *      @endcode
  *
  */
 using DispersionMeasureUnit =
