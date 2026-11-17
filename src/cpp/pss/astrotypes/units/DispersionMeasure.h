@@ -29,6 +29,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #include <boost/units/systems/cgs/length.hpp>
+#include <boost/units/io.hpp>
 #include <boost/units/pow.hpp>
 #include <boost/units/quantity.hpp>
 #pragma GCC diagnostic pop

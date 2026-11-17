@@ -25,8 +25,7 @@
 #include "pss/astrotypes/units/test/DispersionMeasureTest.h"
 #include "pss/astrotypes/units/DispersionMeasure.h"
 #include <boost/units/derived_dimension.hpp>
-#include <boost/units/systems/si/length.hpp>
-#include <boost/units/pow.hpp>
+#include <sstream>
 
 namespace pss {
 namespace astrotypes {
@@ -71,6 +70,15 @@ TEST_F(DispersionMeasureTest, test_dimension)
 TEST_F(DispersionMeasureTest, test_equality)
 {
     ASSERT_EQ(1.0 * parsec_per_cube_cm, 1.0 * parsecs_per_cube_cm);
+}
+
+TEST_F(DispersionMeasureTest, test_output)
+{
+    // operator<< must be available from DispersionMeasure.h alone
+    DispersionMeasure<double> dm(1.5 * parsecs_per_cube_cm);
+    std::ostringstream ss;
+    ss << dm;
+    ASSERT_EQ(ss.str(), "1.5 psc cm^-3");
 }
 
 } // namespace test
