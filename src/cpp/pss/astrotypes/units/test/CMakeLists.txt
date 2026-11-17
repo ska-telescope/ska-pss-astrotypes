@@ -10,6 +10,7 @@ set(gtest_astrotypes_units_src
     src/JulianClockTest.cpp
     src/ModifiedJulianClockTest.cpp
     src/PhysicalConstantsTest.cpp
+    src/DispersionMeasureTest.cpp
 )
 
 add_executable(gtest_astrotypes_units ${gtest_astrotypes_units_src})
