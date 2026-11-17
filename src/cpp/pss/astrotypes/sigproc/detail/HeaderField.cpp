@@ -1,7 +1,7 @@
 /*
- * MIT License
+ * The MIT License (MIT)
  *
- * Copyright (c) 2018 PulsarSearchSoft
+ * Copyright (c) 2018-2026 The SKA organisation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "pss/astrotypes/sigproc/HeaderField.h"
 #include <boost/units/quantity.hpp>
 #include <boost/units/cmath.hpp>
@@ -46,21 +47,24 @@ HeaderField<T>::HeaderField(SigProcLabel const& header_label, Header& h, T const
 }
 
 template<typename T>
-HeaderField<T>::HeaderField(SigProcLabel const& header_label, Header& h, HeaderField const& t)
+HeaderField<T>::HeaderField(SigProcLabel const& header_label
+                            , Header& h
+                            , HeaderField const& t
+                           )
     : BaseT(header_label, h)
     , _var(t._var)
 {
 }
 
 template<typename T>
-HeaderField<T>& HeaderField<T>::operator=(T const& var )
+HeaderField<T>& HeaderField<T>::operator=(T const& var)
 {
     _var = var;
     return *this;
 }
 
 template<typename T>
-void HeaderField<T>::operator=(const HeaderFieldBase& h )
+void HeaderField<T>::operator=(const HeaderFieldBase& h)
 {
     _var = reinterpret_cast<HeaderField<T> const&>(h)._var;
 }
@@ -70,7 +74,7 @@ unsigned HeaderField<T>::read(std::istream& stream)
 {
     T v;
     auto count = SigProcVariable<T>::read(stream, v);
-    _var=v;
+    _var = v;
     return count;
 }
 
@@ -109,35 +113,40 @@ bool HeaderField<T>::operator==(const HeaderField& f) const
 {
     return *f._var == *_var;
 }
-// -------------- std::vector specialization
+
+// ---------------------------
+// std::vector specializations
+// ---------------------------
 template<typename T>
-HeaderField<std::vector<T>>::HeaderField( SigProcLabel const& start_label
-                                        , SigProcLabel const& item_label
-                                        , SigProcLabel const& end_label
-                                        , Header& header)
+HeaderField<std::vector<T>>::HeaderField(SigProcLabel const& start_label
+                                         , SigProcLabel const& item_label
+                                         , SigProcLabel const& end_label
+                                         , Header& header
+                                        )
     : BaseT(start_label, header)
     , _item_label_handler(_var)
     , _end_label(end_label)
     , _item_label(item_label)
 {
-    // register the read handlers
+    // Register the read handlers
     BaseT::add_read(end_label, _end_label_handler, header);
     BaseT::add_read(item_label, _item_label_handler, header);
 }
 
 template<typename T>
-HeaderField<std::vector<T>>::HeaderField( SigProcLabel const& start_label
-                                        , SigProcLabel const& item_label
-                                        , SigProcLabel const& end_label
-                                        , Header& header
-                                        , HeaderField const& copy)
+HeaderField<std::vector<T>>::HeaderField(SigProcLabel const& start_label
+                                         , SigProcLabel const& item_label
+                                         , SigProcLabel const& end_label
+                                         , Header& header
+                                         , HeaderField const& copy
+                                        )
     : BaseT(start_label, header)
     , _var(copy._var)
     , _item_label_handler(_var)
     , _end_label(end_label)
     , _item_label(item_label)
 {
-    // register the read handlers
+    // Register the read handlers
     BaseT::add_read(end_label, _end_label_handler, header);
     BaseT::add_read(item_label, _item_label_handler, header);
 }
@@ -173,13 +182,14 @@ unsigned HeaderField<std::vector<T>>::ItemField::read(std::istream& stream)
 template<typename T>
 unsigned HeaderField<std::vector<T>>::write(std::ostream& stream) const
 {
-    unsigned size=0;
-    for(auto const& var : _var) {
+    unsigned size = 0;
+    for(auto const& var : _var)
+    {
         stream << _item_label;
         size += _item_label.size();
         size += SigProcVariable<T>::write(stream, var);
     }
-    // write out the end marker
+    // Write out the end marker
     stream << _end_label;
     size += _end_label.size();
 
@@ -195,17 +205,19 @@ std::string const& HeaderField<std::vector<T>>::header_info(std::string const&) 
 template<typename T>
 void HeaderField<std::vector<T>>::write_info(std::ostream& stream) const
 {
-    // list all the elements if its a reasonable number
-    std::string sep="";
+    // List all the elements if it's a reasonable number
+    std::string sep = "";
     stream << "(";
-    if(_var.size() < 4) {
-        for( auto const& var : _var )
+    if(_var.size() < 4)
+    {
+        for(auto const& var : _var)
         {
             stream << sep << var;
             sep = ", ";
         }
     }
-    else {
+    else
+    {
         stream << _var[0] << ", " << _var[1] << ", ..., " << _var.back();
     }
     stream << ") " << _var.size() << " elements";
@@ -221,32 +233,39 @@ template<typename T>
 bool HeaderField<std::vector<T>>::operator==(const HeaderField& h) const
 {
     if(h._var.size() != _var.size()) return false;
-    return true;    // only checks if sizes are the same. is this enough?
+    return true; // DEV NOTE: Only checks if sizes are the same. Is this enough?
 }
 
 template<typename T>
-void HeaderField<std::vector<T>>::operator=(const HeaderFieldBase& h )
+void HeaderField<std::vector<T>>::operator=(const HeaderFieldBase& h)
 {
     _var = reinterpret_cast<HeaderField<std::vector<T>> const&>(h)._var;
 }
 
-// ------ HeaderFieldWithTolerance ------
 template<typename T, typename ToleranceType>
-HeaderFieldWithTolerance<T, ToleranceType>::HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const& t)
+HeaderFieldWithTolerance<T, ToleranceType>::HeaderFieldWithTolerance(SigProcLabel const& header_label
+                                                                     , Header& header
+                                                                     , ToleranceType const& t
+                                                                    )
     : BaseT(header_label, header)
     , _tolerance(t)
 {
 }
 
 template<typename T, typename ToleranceType>
-HeaderFieldWithTolerance<T, ToleranceType>::HeaderFieldWithTolerance(SigProcLabel const& header_label, Header& header, ToleranceType const& t, HeaderFieldWithTolerance const& copy)
+HeaderFieldWithTolerance<T, ToleranceType>::HeaderFieldWithTolerance(SigProcLabel const& header_label
+                                                                     , Header& header
+                                                                     , ToleranceType const& t
+                                                                     , HeaderFieldWithTolerance const& copy
+                                                                    )
     : BaseT(header_label, header, copy)
     , _tolerance(t)
 {
 }
 
 template<typename T, typename ToleranceType>
-HeaderFieldWithTolerance<T, ToleranceType>& HeaderFieldWithTolerance<T, ToleranceType>::operator=(T const& h)
+HeaderFieldWithTolerance<T, ToleranceType>&
+    HeaderFieldWithTolerance<T, ToleranceType>::operator=(T const& h)
 {
     static_cast<BaseT&>(*this) = h;
     return *this;
@@ -259,12 +278,14 @@ bool HeaderFieldWithTolerance<T, ToleranceType>::operator==(HeaderFieldBase cons
 }
 
 namespace {
+
 template<typename T2>
 struct compare_tolerance
 {
     template<typename T1>
     static inline
-    bool exec(T1 const& t1, T2 const& t2) {
+    bool exec(T1 const& t1, T2 const& t2)
+    {
         return t1 < t2;
     }
 };
@@ -274,7 +295,8 @@ struct compare_tolerance<HeaderField<T2>>
 {
     template<typename T1>
     static inline
-    bool exec(T1 const& t1, HeaderField<T2> const& t2) {
+    bool exec(T1 const& t1, HeaderField<T2> const& t2)
+    {
         if(t2.is_set())
             return t1 < static_cast<T2 const&>(t2);
         return true;
@@ -286,7 +308,7 @@ struct compare_tolerance<HeaderField<T2>>
 template<typename T, typename ToleranceType>
 bool HeaderFieldWithTolerance<T, ToleranceType>::operator==(HeaderFieldWithTolerance const& h) const
 {
-    // allow for ADL lookups defaulting to std
+    // Allow for ADL lookups defaulting to std
     using std::abs;
     return compare_tolerance<typename std::decay<ToleranceType>::type>::exec(abs(*this->_var - *h._var) , _tolerance); 
 }
@@ -296,7 +318,10 @@ inline HeaderFieldBase::HeaderFieldBase(SigProcLabel const& header_name, Header&
     h.add(header_name, *this);
 }
 
-inline void HeaderFieldBase::add_read(SigProcLabel const& header_label, HeaderFieldBase& field, Header& header)
+inline void HeaderFieldBase::add_read(SigProcLabel const& header_label
+                                      , HeaderFieldBase& field
+                                      , Header& header
+                                     )
 {
     header.add_read(header_label, field);
 }
