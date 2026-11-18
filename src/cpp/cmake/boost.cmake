@@ -11,7 +11,7 @@ if(NOT USE_THIRDPARTY_BOOST)
     if(NOT Boost_FOUND)
         message(STATUS "Checking for an installed boost...")
         # Check for an existing boost install
-        find_package(Boost QUIET)
+        find_package(Boost CONFIG QUIET)
         if(Boost_FOUND)
             message(STATUS "External Boost found (version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION})")
         else()

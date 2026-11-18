@@ -26,16 +26,9 @@
 #
 #===============================================================================
 
-# Specify project name and minumum cmake version
+# Specify project name and minimum cmake version
+cmake_minimum_required(VERSION 3.14)
 project(astrotypes)
-if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW) # use full paths to libraries on the link line
-    cmake_policy(SET CMP0000 OLD) # don't complain about not having a minimum cmake version
-
-    if(${CMAKE_MAJOR_VERSION} GREATER 2)
-        cmake_policy(SET CMP0048 OLD) # don't let cmake control the version variables
-    endif()
-endif()
 enable_testing()
 
 # CMake setup

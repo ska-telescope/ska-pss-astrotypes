@@ -30,7 +30,8 @@
 #===============================================================================
 
 # Specify project name and programming language
-project(astrotypes CXX)
+project(astrotypes VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} LANGUAGES CXX)
+set(PROJECT_VERSION "${PROJECT_VERSION} ${PROJECT_SOURCE_VERSION}")
 
 # CMake setup
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

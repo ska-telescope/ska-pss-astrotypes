@@ -5,11 +5,13 @@ include(FetchContent)
 
 set(GTEST_VERSION "release-1.12.1")
 #set the destination directory for the download of googletest
-set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest")
+set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/_deps")
 
 find_package(GTest)
 if(GTest_FOUND)
   message("GTest found")
+  get_target_property(GTEST_INCLUDE_DIR GTest::gtest INTERFACE_INCLUDE_DIRECTORIES)
+  set(GTEST_LIBRARIES GTest::gtest_main GTest::gtest)
 
 else()
   message("GTest not found. Fetching Googletest version ${GTEST_VERSION}")
@@ -34,8 +36,8 @@ if(NOT GTEST_INCLUDE_DIR)
         add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
     endif()
 
-    set(GTEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest/googletest-src/googletest/include)
-    set(GMOCK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest/googletest-src/googlemock/include)
+    set(GTEST_INCLUDE_DIR ${googletest_SOURCE_DIR}/googletest/include)
+    set(GMOCK_INCLUDE_DIR ${googletest_SOURCE_DIR}/googlemock/include)
     set(GTEST_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/googletest)
     set(GTEST_LIBRARIES gtest_main gtest)
 endif()

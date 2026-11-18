@@ -1,5 +1,11 @@
 variables:
     GIT_STRATEGY: clone
+    RUNNER_TAG: "pss-dokimi-docker"
+
+default:
+  image: buildpack-deps:26.04@sha256:194c70abaf37ac12f2aadca115308af03f90cbf60c1ffbd3afc4a7a451f65368
+  tags:
+    - ${RUNNER_TAG}
 
 stages:
   - lint
@@ -8,6 +14,9 @@ stages:
   - publish-docs
 
 .common:
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends cmake libboost-all-dev
   rules:
       # Execute pipeline automatically if commit is made to main
       # (this should only happen when code is merged to main)
@@ -27,7 +36,6 @@ stages:
 
 lint:
   stage: lint
-  image: ubuntu:22.04
   rules:
       # Execute job automatically if commit is made to main
       # (this should only happen when code is merged to main)
@@ -47,7 +55,7 @@ lint:
     - apt-get -y update
     - apt install -y cmake
     - cmake --version
-    - apt install -y python3 gcc g++ libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libfftw3-dev git
+    - apt install -y python3 gcc g++ libboost-program-options-dev libboost-filesystem-dev libfftw3-dev git
     - apt install -y clang-tidy
     - clang-tidy --version
     - 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -90,15 +98,11 @@ lint:
 
 build-release:
   extends: .builds
-  tags:
-    - ubuntu-22.04
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=release"
 
 build-debug:
   extends: .builds
-  tags:
-    - ds-psi-pss-worker-1b
   variables:
     CMAKE_FLAGS: "-DCMAKE_BUILD_TYPE=debug"
 
@@ -106,8 +110,6 @@ test-release:
   extends: .tests
   needs:
     - build-release
-  tags:
-    - ubuntu-22.04
   variables:
     SPIN: release
 
@@ -115,8 +117,6 @@ test-debug:
   extends: .tests
   needs:
     - build-debug
-  tags:
-    - ds-psi-pss-worker-1b
   variables:
     SPIN: debug
 
